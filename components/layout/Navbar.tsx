@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "@/lib/auth-client";
+import { useCart } from "@/context/CartContext";
 
 const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
@@ -25,8 +26,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: session } = useSession();
 
-  // TODO: wire from cart context
-  const cartCount = 0;
+  const { itemCount: cartCount } = useCart();
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-raised">

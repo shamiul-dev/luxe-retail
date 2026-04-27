@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ShoppingCart, Heart } from "lucide-react";
+import AddToCartButton from "./AddToCartButton";
+import { Heart } from "lucide-react";
 import { Product } from "@/db/schema";
 
 interface ProductCardProps {
@@ -77,15 +78,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          <button
-            aria-label="Add to cart"
-            className="w-8 h-8 bg-surface-low rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer group/btn"
-          >
-            <ShoppingCart
-              size={15}
-              className="text-content-secondary group-hover/btn:text-white transition-colors"
-            />
-          </button>
+          <AddToCartButton productId={product.id} />
         </div>
       </div>
     </div>

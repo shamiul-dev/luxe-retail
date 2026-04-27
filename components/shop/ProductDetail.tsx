@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
+import { useCart } from "@/context/CartContext";
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 
 interface Product {
@@ -67,6 +70,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     "description" | "specs" | "reviews"
   >("description");
   const [wishlisted, setWishlisted] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const { addItem } = useCart();
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const rating = Number(product.rating ?? 0);
   const inStock = product.stock > 0;
@@ -82,14 +89,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       ? product.images
       : ["/placeholder.jpg", "/placeholder.jpg", "/placeholder.jpg"];
 
-  function handleAddToCart() {
-    // TODO: wire to cart context/API
-    console.log("Add to cart", {
-      productId: product.id,
-      selectedColor,
-      selectedSize,
+  async function handleAddToCart() {
+    if (!session) {
+      router.push("/auth");
+      return;
+    }
+    setAdding(true);
+    await addItem(
+      product.id,
       quantity,
-    });
+      selectedColor ?? undefined,
+      selectedSize ?? undefined,
+    );
+    setAdding(false);
   }
 
   return (
@@ -296,11 +308,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             variant="primary"
             size="lg"
             onClick={handleAddToCart}
-            disabled={!inStock}
+            disabled={!inStock || adding}
             className="flex-1 gap-2"
           >
             <ShoppingCart size={18} />
-            Add to Cart
+            {adding ? "Adding..." : "Add to Cart"}
           </Button>
         </div>
 
