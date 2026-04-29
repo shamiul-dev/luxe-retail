@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AddToCartButton from "./AddToCartButton";
-import { Heart } from "lucide-react";
+import WishlistButton from "./WishlistButton";
 import { Product } from "@/db/schema";
 
 interface ProductCardProps {
@@ -45,13 +45,10 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {/* Wishlist */}
-        <button
-          aria-label="Add to wishlist"
-          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-raised opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-surface-low cursor-pointer"
-        >
-          <Heart size={15} className="text-content-secondary" />
-        </button>
+        <WishlistButton
+          productId={product.id}
+          className="absolute top-3 right-3 opacity-0 group-hover:opacity-100"
+        />
       </Link>
 
       {/* Info */}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 export const metadata: Metadata = {
   title: { default: "Luxe Retail", template: "%s | Luxe Retail" },
@@ -28,7 +29,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-surface text-content antialiased">
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <WishlistProvider>{children}</WishlistProvider>
+        </CartProvider>
       </body>
     </html>
   );

@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
@@ -27,6 +28,7 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   const { itemCount: cartCount } = useCart();
+  const { itemCount: wishlistCount } = useWishlist();
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-raised">
@@ -88,9 +90,14 @@ export default function Navbar() {
             <Link
               href="/wishlist"
               aria-label="Wishlist"
-              className="p-2 rounded-lg text-content-secondary hover:text-primary hover:bg-surface-low transition-colors"
+              className="relative p-2 rounded-lg text-content-secondary hover:text-primary hover:bg-surface-low transition-colors"
             >
               <Heart size={20} />
+              {wishlistCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
 
             {/* Cart */}
