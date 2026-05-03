@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useSession, signOut } from "@/lib/auth-client";
+import {
+  useSession,
+  signOut,
+  updateUser,
+  changePassword,
+} from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import {
   User,
@@ -27,6 +32,7 @@ export default function AccountContent() {
 
   // Edit form state
   const [name, setName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -48,6 +54,7 @@ export default function AccountContent() {
 
   function handleEditClick() {
     setName(session!.user.name);
+    setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
     setError(null);
@@ -72,10 +79,46 @@ export default function AccountContent() {
       setError("Password must be at least 8 characters.");
       return;
     }
+    if (newPassword && !currentPassword) {
+      setError("Please enter your current password.");
+      return;
+    }
 
     setSaving(true);
-    // TODO: wire to Better Auth updateUser / changePassword
-    await new Promise((r) => setTimeout(r, 600));
+
+    // Update name
+    if (name !== session!.user.name) {
+      const { error: err } = await updateUser({ name });
+      if (err) {
+        setError(err.message ?? "Failed to update name.");
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Update password if provided
+    if (newPassword) {
+      const { error: err } = await changePassword({
+        newPassword,
+        currentPassword,
+        revokeOtherSessions: true,
+      });
+      if (err) {
+        setError(
+          err.message ??
+            "Failed to update password. Make sure your current password is correct.",
+        );
+        setSaving(false);
+        return;
+      }
+      // Better Auth revokes the session after password change — redirect to sign in
+      setSaving(false);
+      await signOut();
+      router.push("/auth?message=password-changed");
+      return;
+    }
+
+    setCurrentPassword("");
     setSaving(false);
     setSuccess(true);
     setEditing(false);
@@ -253,6 +296,15 @@ export default function AccountContent() {
                     </span>
                   </p>
 
+                  <Input
+                    id="currentPassword"
+                    label="Current Password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    minLength={8}
+                  />
                   <Input
                     id="newPassword"
                     label="New Password"

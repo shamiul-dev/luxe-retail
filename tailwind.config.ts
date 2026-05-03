@@ -43,22 +43,29 @@ const config: Config = {
         error: "#ba1a1a",
       },
       boxShadow: {
-        raised:   "0 1px 3px rgba(26,35,126,0.08), 0 1px 2px rgba(26,35,126,0.06)",
-        overlay:  "0 4px 16px rgba(26,35,126,0.10), 0 2px 6px rgba(26,35,126,0.06)",
-        floating: "0 8px 32px rgba(26,35,126,0.14), 0 4px 12px rgba(26,35,126,0.08)",
+        raised:
+          "0 1px 3px rgba(26,35,126,0.08), 0 1px 2px rgba(26,35,126,0.06)",
+        overlay:
+          "0 4px 16px rgba(26,35,126,0.10), 0 2px 6px rgba(26,35,126,0.06)",
+        floating:
+          "0 8px 32px rgba(26,35,126,0.14), 0 4px 12px rgba(26,35,126,0.08)",
       },
       borderRadius: {
-        sm:  "0.25rem",
+        sm: "0.25rem",
         DEFAULT: "0.5rem",
-        md:  "0.75rem",
-        lg:  "1rem",
-        xl:  "1.5rem",
+        md: "0.75rem",
+        lg: "1rem",
+        xl: "1.5rem",
       },
       maxWidth: {
         container: "1280px",
       },
     },
   },
+  safelist: [
+    // Ensure admin avatar bg is included
+    "bg-primary-container",
+  ],
   plugins: [],
 };
 export default config;

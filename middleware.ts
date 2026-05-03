@@ -22,9 +22,13 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Admin protection — full role check happens server-side in layout
+  // Admin — redirect unauthenticated users to auth
+  // Full role check is done server-side in app/(admin)/layout.tsx
   if (ADMIN.some((p) => pathname.startsWith(p)) && !session) {
-    return NextResponse.redirect(new URL(AUTH_PAGE, req.url));
+    const url = req.nextUrl.clone();
+    url.pathname = AUTH_PAGE;
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

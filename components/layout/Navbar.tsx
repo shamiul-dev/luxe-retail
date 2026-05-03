@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "@/lib/auth-client";
@@ -117,6 +118,15 @@ export default function Navbar() {
             {/* Account / Sign out */}
             {session ? (
               <div className="flex items-center gap-1">
+                {(session.user as any).role === "admin" && (
+                  <Link
+                    href="/admin/dashboard"
+                    aria-label="Admin Panel"
+                    className="p-2 rounded-lg text-content-secondary hover:text-primary hover:bg-surface-low transition-colors"
+                  >
+                    <LayoutDashboard size={20} />
+                  </Link>
+                )}
                 <Link
                   href="/account"
                   aria-label="Account"
