@@ -268,6 +268,7 @@ export default function AdminOrders({
                           }
                           disabled={updating === order.id}
                           className="text-xs font-medium text-content bg-transparent border-none outline-none cursor-pointer capitalize disabled:opacity-50"
+                          title="Change Status"
                         >
                           {[
                             "pending",
@@ -288,7 +289,10 @@ export default function AdminOrders({
                         <button className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-xs font-medium text-content-secondary hover:bg-surface-low transition-colors cursor-pointer">
                           Update Status
                         </button>
-                        <button className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer text-content-secondary hover:text-primary">
+                        <button
+                          className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer text-content-secondary hover:text-primary"
+                          title="View Details"
+                        >
                           <Eye size={14} />
                         </button>
                       </div>

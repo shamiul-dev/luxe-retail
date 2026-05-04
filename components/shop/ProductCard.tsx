@@ -1,7 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
 import { Product } from "@/db/schema";
+
+function getFirstImage(
+  images: string[] | string | null | undefined,
+): string | null {
+  if (!images) return null;
+  if (Array.isArray(images)) return images[0] ?? null;
+  // Handle PostgreSQL array string format: {url1,url2}
+  const match = String(images).match(/\{(.+?)\}/);
+  if (match) return match[1].split(",")[0] ?? null;
+  return null;
+}
 
 interface ProductCardProps {
   product: Product & { category?: { name: string } | null };
@@ -27,9 +39,19 @@ export default function ProductCard({ product }: ProductCardProps) {
         href={`/shop/${product.slug}`}
         className="block relative aspect-square bg-surface-low overflow-hidden"
       >
-        <div className="w-full h-full flex items-center justify-center text-content-muted text-xs p-4 text-center">
-          {product.name}
-        </div>
+        {getFirstImage(product.images) ? (
+          <Image
+            src={getFirstImage(product.images)!}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 768px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-content-muted text-xs p-4 text-center">
+            {product.name}
+          </div>
+        )}
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">

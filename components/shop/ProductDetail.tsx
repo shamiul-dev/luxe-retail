@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useState } from "react";
 import {
@@ -84,10 +85,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     : null;
 
   // Placeholder images — replace with real product.images
-  const images =
-    product.images.length > 0
-      ? product.images
-      : ["/placeholder.jpg", "/placeholder.jpg", "/placeholder.jpg"];
+  const images = product.images.length > 0 ? product.images : [];
 
   async function handleAddToCart() {
     if (!session) {
@@ -110,9 +108,20 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       <div className="flex flex-col gap-4">
         {/* Main image */}
         <div className="relative aspect-square bg-surface-low rounded-2xl overflow-hidden">
-          <div className="w-full h-full flex items-center justify-center text-content-muted text-sm">
-            {product.name}
-          </div>
+          {images[activeImage] && images[activeImage] !== "/placeholder.jpg" ? (
+            <Image
+              src={images[activeImage]}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-content-muted text-sm bg-surface-low">
+              {product.name}
+            </div>
+          )}
 
           {/* Badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -146,13 +155,25 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 key={i}
                 onClick={() => setActiveImage(i)}
                 className={cn(
-                  "w-20 h-20 rounded-xl bg-surface-low border-2 transition-all cursor-pointer overflow-hidden flex items-center justify-center text-xs text-content-muted",
+                  "w-20 h-20 rounded-xl bg-surface-low border-2 transition-all cursor-pointer overflow-hidden relative",
                   activeImage === i
                     ? "border-primary"
                     : "border-transparent hover:border-border-strong",
                 )}
               >
-                {i + 1}
+                {images[i] && images[i] !== "/placeholder.jpg" ? (
+                  <Image
+                    src={images[i]}
+                    alt={product.name + " " + (i + 1)}
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
+                ) : (
+                  <span className="flex items-center justify-center w-full h-full text-xs text-content-muted">
+                    {i + 1}
+                  </span>
+                )}
               </button>
             ))}
           </div>

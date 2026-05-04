@@ -241,13 +241,17 @@ export default function AdminProducts({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <button className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer text-content-secondary hover:text-primary">
+                      <button
+                        aria-label="Edit"
+                        className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer text-content-secondary hover:text-primary"
+                      >
                         <Pencil size={14} />
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
                         disabled={deleting === product.id}
                         className="p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer text-content-secondary hover:text-red-500 disabled:opacity-50"
+                        aria-label="Delete"
                       >
                         <Trash2 size={14} />
                       </button>
