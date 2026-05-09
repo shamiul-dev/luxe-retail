@@ -3,12 +3,19 @@
 import { useState } from "react";
 import { Pencil, Trash2, Plus, Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ProductFormModal from "./ProductFormModal";
 
 function formatPrice(amount: string | number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(Number(amount));
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 interface Product {
@@ -19,18 +26,30 @@ interface Product {
   stock: number;
   status: string;
   category?: { name: string } | null;
+  description: string;
+  comparePrice?: string | null;
+  categoryId?: string | null;
+  brand?: string | null;
+  colors?: string[] | null;
+  sizes?: string[] | null;
+  tags?: string[] | null;
+  isNew: boolean;
 }
 
 interface AdminProductsProps {
   products: Product[];
+  categories: Category[];
 }
 
 export default function AdminProducts({
   products: initialProducts,
+  categories,
 }: AdminProductsProps) {
   const [products, setProducts] = useState(initialProducts);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
 
   const filtered = products.filter(
     (p) =>
@@ -41,6 +60,26 @@ export default function AdminProducts({
   const totalProducts = products.length;
   const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
   const outOfStock = products.filter((p) => p.stock === 0).length;
+
+  function handleAddNew() {
+    setEditProduct(null);
+    setModalOpen(true);
+  }
+
+  function handleEdit(product: Product) {
+    setEditProduct(product);
+    setModalOpen(true);
+  }
+
+  function handleModalSave(saved: Product) {
+    setProducts((prev) => {
+      const exists = prev.find((p) => p.id === saved.id);
+      if (exists)
+        return prev.map((p) => (p.id === saved.id ? { ...p, ...saved } : p));
+      return [saved, ...prev];
+    });
+    setModalOpen(false);
+  }
 
   async function handleDelete(productId: string) {
     if (!confirm("Are you sure you want to delete this product?")) return;
@@ -78,7 +117,10 @@ export default function AdminProducts({
             View and manage your store catalog.
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-accent text-white text-sm font-semibold rounded-lg hover:bg-accent-hover transition-colors cursor-pointer">
+        <button
+          onClick={handleAddNew}
+          className="flex items-center gap-2 px-4 py-2.5 bg-accent text-white text-sm font-semibold rounded-lg hover:bg-accent-hover transition-colors cursor-pointer"
+        >
           <Plus size={16} /> Add New Product
         </button>
       </div>
@@ -131,7 +173,6 @@ export default function AdminProducts({
           </button>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -170,7 +211,8 @@ export default function AdminProducts({
                     <input
                       type="checkbox"
                       className="accent-primary cursor-pointer"
-                      aria-label={`Select product ${product.name}`}
+                      label={`Select ${product.name}`}
+                      aria-label={`Select ${product.name}`}
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -242,8 +284,9 @@ export default function AdminProducts({
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
-                        aria-label="Edit"
+                        onClick={() => handleEdit(product)}
                         className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer text-content-secondary hover:text-primary"
+                        title="Edit Product"
                       >
                         <Pencil size={14} />
                       </button>
@@ -251,7 +294,7 @@ export default function AdminProducts({
                         onClick={() => handleDelete(product.id)}
                         disabled={deleting === product.id}
                         className="p-1.5 rounded-lg hover:bg-red-50 transition-colors cursor-pointer text-content-secondary hover:text-red-500 disabled:opacity-50"
-                        aria-label="Delete"
+                        title="Delete Product"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -277,6 +320,16 @@ export default function AdminProducts({
           Showing {filtered.length} of {totalProducts} products
         </div>
       </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <ProductFormModal
+          product={editProduct}
+          categories={categories}
+          onClose={() => setModalOpen(false)}
+          onSave={handleModalSave}
+        />
+      )}
     </div>
   );
 }

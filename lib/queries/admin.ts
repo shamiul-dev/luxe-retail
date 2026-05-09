@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { orders, products, users, orderItems } from "@/db/schema";
 import { eq, desc, sql, count, sum } from "drizzle-orm";
+import { orders, products, users, orderItems, categories } from "@/db/schema";
 
 export async function getDashboardStats() {
   const [totalSales] = await db
@@ -96,4 +96,41 @@ export async function updateProductStatus(
     .where(eq(products.id, productId))
     .returning();
   return updated;
+}
+
+export async function getProductById(productId: string) {
+  return db.query.products.findFirst({
+    where: eq(products.id, productId),
+    with: { category: true },
+  });
+}
+
+export async function updateProduct(
+  productId: string,
+  data: {
+    name?: string;
+    description?: string;
+    price?: string;
+    comparePrice?: string | null;
+    categoryId?: string | null;
+    brand?: string | null;
+    sku?: string;
+    stock?: number;
+    status?: "active" | "inactive";
+    colors?: string[];
+    sizes?: string[];
+    tags?: string[];
+    isNew?: boolean;
+  },
+) {
+  const [updated] = await db
+    .update(products)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(products.id, productId))
+    .returning();
+  return updated;
+}
+
+export async function getAllCategories() {
+  return db.select().from(categories);
 }
