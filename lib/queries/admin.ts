@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { eq, desc, sql, count, sum } from "drizzle-orm";
+import { eq, desc, sql, count, sum, gte } from "drizzle-orm";
 import { orders, products, users, orderItems, categories } from "@/db/schema";
 
 export async function getDashboardStats() {
@@ -51,6 +51,47 @@ export async function getTopProducts(limit = 5) {
       desc(sum(sql`${orderItems.price}::numeric * ${orderItems.quantity}`)),
     )
     .limit(limit);
+}
+
+export async function getWeeklySalesChart() {
+  // Last 4 weeks of data, grouped by ISO week
+  const fourWeeksAgo = new Date();
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+
+  const rows = await db
+    .select({
+      week: sql<string>`to_char(date_trunc('week', ${orders.createdAt}), 'Mon DD')`,
+      weekStart: sql<string>`date_trunc('week', ${orders.createdAt})`,
+      revenue: sum(orders.total),
+      orderCount: count(),
+    })
+    .from(orders)
+    .where(gte(orders.createdAt, fourWeeksAgo))
+    .groupBy(
+      sql`date_trunc('week', ${orders.createdAt})`,
+    )
+    .orderBy(sql`date_trunc('week', ${orders.createdAt})`);
+
+  // Ensure we always return 4 entries, filling missing weeks with zeros
+  const result: { week: string; revenue: number; orderCount: number }[] = [];
+  for (let i = 3; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i * 7);
+    // Find the Monday of that week
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    const label = monday.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const weekKey = monday.toISOString().slice(0, 10);
+
+    const match = rows.find((r) => r.weekStart.slice(0, 10) === weekKey);
+    result.push({
+      week: label,
+      revenue: Number(match?.revenue ?? 0),
+      orderCount: Number(match?.orderCount ?? 0),
+    });
+  }
+  return result;
 }
 
 export async function getAllProducts() {

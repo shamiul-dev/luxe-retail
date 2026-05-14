@@ -72,6 +72,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   >("description");
   const [wishlisted, setWishlisted] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
   const { addItem } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
@@ -100,6 +101,24 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       selectedSize ?? undefined,
     );
     setAdding(false);
+  }
+
+  async function handleBuyNow() {
+    if (!session) {
+      router.push("/auth");
+      return;
+    }
+    setBuyingNow(true);
+    
+    // Instead of adding to cart, redirect directly to checkout with query params
+    const params = new URLSearchParams();
+    params.set("buyNow", "true");
+    params.set("productId", product.id);
+    params.set("qty", quantity.toString());
+    if (selectedColor) params.set("color", selectedColor);
+    if (selectedSize) params.set("size", selectedSize);
+    
+    router.push(`/checkout?${params.toString()}`);
   }
 
   return (
@@ -338,8 +357,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </div>
 
         {/* Buy Now */}
-        <Button variant="secondary" size="lg" fullWidth disabled={!inStock}>
-          Buy Now
+        <Button
+          variant="secondary"
+          size="lg"
+          fullWidth
+          disabled={!inStock || buyingNow}
+          onClick={handleBuyNow}
+        >
+          {buyingNow ? "Processing..." : "Buy Now"}
         </Button>
 
         {/* Shipping note */}

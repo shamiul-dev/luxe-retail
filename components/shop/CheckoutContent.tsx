@@ -12,6 +12,10 @@ import Input from "@/components/ui/Input";
 const STEPS = ["SHIPPING", "PAYMENT", "REVIEW"] as const;
 type Step = (typeof STEPS)[number];
 
+interface CheckoutContentProps {
+  buyNowItem?: any;
+}
+
 const SHIPPING_METHODS = [
   {
     id: "standard",
@@ -34,10 +38,21 @@ function formatPrice(amount: number) {
   }).format(amount);
 }
 
-export default function CheckoutContent() {
+export default function CheckoutContent({ buyNowItem }: CheckoutContentProps) {
   const router = useRouter();
-  const { items, subtotal, tax, itemCount, refresh } = useCart();
+  const cart = useCart();
   const { data: session } = useSession();
+
+  const items = buyNowItem ? [buyNowItem] : cart.items;
+  const itemCount = buyNowItem ? buyNowItem.quantity : cart.itemCount;
+  
+  const subtotal = items.reduce(
+    (sum, item) => sum + Number(item.product.price) * item.quantity,
+    0,
+  );
+  
+  const tax = parseFloat((subtotal * 0.08).toFixed(2)); // Use same logic as cart
+  const FREE_SHIPPING_THRESHOLD = 150;
 
   const [step, setStep] = useState<Step>("SHIPPING");
   const [loading, setLoading] = useState(false);
@@ -55,8 +70,12 @@ export default function CheckoutContent() {
 
   const [card, setCard] = useState({ number: "", expiry: "", cvv: "" });
 
-  const shipping = shippingMethod.price;
-  const orderTotal = subtotal + shipping + tax;
+  const shippingPrice = shippingMethod.price;
+  
+  // Update shipping if free threshold met
+  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : subtotal > 0 ? shippingPrice : 0;
+  
+  const orderTotal = parseFloat((subtotal + shipping + tax).toFixed(2));
 
   function handleAddressChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -111,7 +130,9 @@ export default function CheckoutContent() {
       return;
     }
 
-    await refresh();
+    if (!buyNowItem) {
+      await cart.refresh();
+    }
     router.push(`/orders/confirmation?order=${data.order.orderNumber}`);
   }
 

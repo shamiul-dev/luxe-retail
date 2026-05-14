@@ -42,7 +42,7 @@ export default function Hero() {
             </Link>
             <Link
               href="/shop?sort=newest"
-              className="px-8 py-3.5 border border-content text-content text-sm font-semibold rounded-lg hover:bg-white transition-all duration-200 active:scale-[0.98]"
+              className="px-8 py-3.5 border border-content text-content text-sm font-semibold rounded-lg hover:bg-white/25 transition-all duration-200 active:scale-[0.98]"
             >
               Explore Trends
             </Link>

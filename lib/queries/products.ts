@@ -84,6 +84,13 @@ export async function getProductBySlug(slug: string) {
   });
 }
 
+export async function getProductById(id: string) {
+  return db.query.products.findFirst({
+    where: eq(products.id, id),
+    with: { category: true },
+  });
+}
+
 export async function getNewArrivals(limit = 5) {
   return db.query.products.findMany({
     where: eq(products.status, "active"),
