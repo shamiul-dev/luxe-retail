@@ -6,7 +6,7 @@ import ShopToolbar from "./ShopToolbar";
 import ShopFilters from "./ShopFilters";
 import ProductGrid from "./ProductGrid";
 import Pagination from "./Pagination";
-import { Product } from "@/types";
+import { Product } from "@/db/schema";
 
 interface ShopContentProps {
   products: Product[];
