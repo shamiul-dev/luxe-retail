@@ -4,32 +4,21 @@ export interface Product {
   name: string;
   slug: string;
   description: string;
-
-  price: number;
+  price: any;
   comparePrice?: number;
-
   images: string[];
-
-  categoryId?: string | null;
-  category?: { name: string } | null;
-
-  brand?: string | null;
-
+  category: string;
+  brand?: string;
   sku: string;
   stock: number;
   status: "active" | "inactive";
-
-  colors: string[] | null;
-  sizes: string[] | null;
-
+  colors?: string[];
+  sizes?: string[];
   rating?: number;
   reviewCount?: number;
-
-  tags: string[] | null;
+  tags?: string[];
   isNew?: boolean;
-
   createdAt: string;
-  updatedAt: string;
 }
 
 // ─── Cart ─────────────────────────────────────────────────────────────────────
