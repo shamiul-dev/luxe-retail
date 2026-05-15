@@ -4,21 +4,32 @@ export interface Product {
   name: string;
   slug: string;
   description: string;
+
   price: number;
   comparePrice?: number;
+
   images: string[];
-  category: string;
-  brand?: string;
+
+  categoryId?: string | null;
+  category?: { name: string } | null;
+
+  brand?: string | null;
+
   sku: string;
   stock: number;
   status: "active" | "inactive";
-  colors?: string[];
-  sizes?: string[];
+
+  colors?: string[] | null;
+  sizes?: string[] | null;
+
   rating?: number;
   reviewCount?: number;
-  tags?: string[];
+
+  tags?: string[] | null;
   isNew?: boolean;
+
   createdAt: string;
+  updatedAt: string;
 }
 
 // ─── Cart ─────────────────────────────────────────────────────────────────────
@@ -43,7 +54,12 @@ export interface Cart {
 }
 
 // ─── Order ────────────────────────────────────────────────────────────────────
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus =
+  | "pending"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
 export type PaymentStatus = "paid" | "processing" | "failed" | "refunded";
 
 export interface Order {
