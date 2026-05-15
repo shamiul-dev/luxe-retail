@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Search, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ORDER_STATUS_MAP, PAYMENT_STATUS_MAP } from "@/lib/constants";
@@ -289,12 +290,13 @@ export default function AdminOrders({
                         <button className="flex items-center gap-1.5 px-2.5 py-1.5 border border-border rounded-lg text-xs font-medium text-content-secondary hover:bg-surface-low transition-colors cursor-pointer">
                           Update Status
                         </button>
-                        <button
+                        <Link
+                          href={`/admin/orders/${order.id}`}
                           className="p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer text-content-secondary hover:text-primary"
                           title="View Details"
                         >
                           <Eye size={14} />
-                        </button>
+                        </Link>
                       </div>
                     </td>
                   </tr>

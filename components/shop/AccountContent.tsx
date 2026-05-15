@@ -21,9 +21,30 @@ import { cn } from "@/lib/utils";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
+import { ORDER_STATUS_MAP } from "@/lib/constants";
+
 type Tab = "profile" | "orders" | "security";
 
-export default function AccountContent() {
+interface AccountContentProps {
+  recentOrders?: any[];
+}
+
+function formatPrice(amount: string | number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(amount));
+}
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(dateStr));
+}
+
+export default function AccountContent({ recentOrders = [] }: AccountContentProps) {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
@@ -368,24 +389,77 @@ export default function AccountContent() {
                   View All
                 </a>
               </div>
-              <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
-                <div className="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center">
-                  <Package size={24} className="text-content-muted" />
+              {recentOrders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
+                  <div className="w-14 h-14 bg-surface-container rounded-full flex items-center justify-center">
+                    <Package size={24} className="text-content-muted" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-content text-sm mb-1">
+                      No orders yet
+                    </p>
+                    <p className="text-content-muted text-sm">
+                      When you place an order it will appear here.
+                    </p>
+                  </div>
+                  <a href="/shop">
+                    <Button variant="primary" size="sm">
+                      Start Shopping
+                    </Button>
+                  </a>
                 </div>
-                <div>
-                  <p className="font-semibold text-content text-sm mb-1">
-                    No orders yet
-                  </p>
-                  <p className="text-content-muted text-sm">
-                    When you place an order it will appear here.
-                  </p>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {recentOrders.map((order) => {
+                    const statusInfo = ORDER_STATUS_MAP[order.status] ?? {
+                      label: order.status,
+                      classes: "bg-gray-50 text-gray-700 border border-gray-200",
+                    };
+                    
+                    return (
+                      <div key={order.id} className="border border-border rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-surface-low rounded-lg flex items-center justify-center text-content-muted shrink-0">
+                            <Package size={20} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-content">
+                              {order.orderNumber}
+                            </p>
+                            <p className="text-xs text-content-muted mt-0.5">
+                              {formatDate(order.createdAt)} · {order.items?.length || 0} items
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-1/2">
+                          <div className="text-left sm:text-right">
+                            <p className="text-xs text-content-muted mb-1">Total</p>
+                            <p className="text-sm font-semibold text-content">{formatPrice(order.total)}</p>
+                          </div>
+                          
+                          <div className="flex items-center gap-4">
+                            <span
+                              className={cn(
+                                "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide",
+                                statusInfo.classes,
+                              )}
+                            >
+                              {statusInfo.label}
+                            </span>
+                            <a
+                              href={`/orders`}
+                              className="text-xs font-semibold text-accent hover:text-accent-hover transition-colors"
+                            >
+                              Details
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <a href="/shop">
-                  <Button variant="primary" size="sm">
-                    Start Shopping
-                  </Button>
-                </a>
-              </div>
+              )}
             </div>
           )}
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Heart,
@@ -26,6 +27,8 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
   const { data: session } = useSession();
 
   const { itemCount: cartCount } = useCart();
@@ -60,7 +63,15 @@ export default function Navbar() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-1">
             {/* Search */}
-            <div
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim()) {
+                  router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                  setSearchOpen(false);
+                  setSearchQuery("");
+                }
+              }}
               className={cn(
                 "flex items-center transition-all duration-300 overflow-hidden",
                 searchOpen ? "w-52" : "w-9",
@@ -70,13 +81,29 @@ export default function Navbar() {
                 <input
                   autoFocus
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search products..."
-                  onBlur={() => setSearchOpen(false)}
+                  onBlur={(e) => {
+                    // Slight delay to allow submit button to work before closing
+                    if (!e.relatedTarget) {
+                      setTimeout(() => setSearchOpen(false), 150);
+                    }
+                  }}
                   className="flex-1 text-sm px-3 py-1.5 bg-surface-low rounded-l-lg outline-none text-content placeholder-content-muted"
                 />
               )}
               <button
-                onClick={() => setSearchOpen(!searchOpen)}
+                type="button"
+                onClick={() => {
+                  if (searchOpen && searchQuery.trim()) {
+                    router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  } else {
+                    setSearchOpen(!searchOpen);
+                  }
+                }}
                 aria-label="Search"
                 className={cn(
                   "p-2 rounded-lg text-content-secondary hover:text-primary hover:bg-surface-low cursor-pointer transition-colors",
@@ -85,7 +112,7 @@ export default function Navbar() {
               >
                 <Search size={20} />
               </button>
-            </div>
+            </form>
 
             {/* Wishlist */}
             <Link

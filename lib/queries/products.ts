@@ -11,6 +11,11 @@ export async function getProducts(filters: ProductFilters, page = 1) {
   // Status always active for storefront
   conditions.push(eq(products.status, "active"));
 
+  // Search query
+  if (filters.query) {
+    conditions.push(ilike(products.name, `%${filters.query}%`));
+  }
+
   // Category filter — join on category slug
   if (filters.category) {
     const category = await db.query.categories.findFirst({

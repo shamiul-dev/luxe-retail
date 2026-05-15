@@ -108,6 +108,7 @@ export interface Category {
 
 // ─── Filters ──────────────────────────────────────────────────────────────────
 export interface ProductFilters {
+  query?: string;
   category?: string;
   brand?: string;
   minPrice?: number;

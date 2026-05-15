@@ -108,6 +108,13 @@ export async function getAllOrders() {
   });
 }
 
+export async function getOrderById(orderId: string) {
+  return db.query.orders.findFirst({
+    where: eq(orders.id, orderId),
+    with: { items: true },
+  });
+}
+
 export async function getAllCustomers() {
   return db.query.users.findMany({
     orderBy: desc(users.createdAt),

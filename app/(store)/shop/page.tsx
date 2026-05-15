@@ -5,6 +5,7 @@ import ShopContent from "@/components/shop/ShopContent";
 
 interface ShopPageProps {
   searchParams: {
+    q?: string;
     category?: string;
     brand?: string;
     minPrice?: string;
@@ -22,6 +23,7 @@ export const revalidate = 60;
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const filters: ProductFilters = {
+    query: searchParams.q,
     category: searchParams.category,
     brand: searchParams.brand,
     minPrice: searchParams.minPrice ? Number(searchParams.minPrice) : undefined,
@@ -32,7 +34,13 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   const page = Number(searchParams.page ?? 1);
   const { products, total } = await getProducts(filters, page);
-  const heading = searchParams.category ?? "All Products";
+  
+  let heading = "All Products";
+  if (searchParams.q) {
+    heading = `Search Results for "${searchParams.q}"`;
+  } else if (searchParams.category) {
+    heading = searchParams.category;
+  }
 
   return (
     <div className="max-w-container mx-auto px-6 py-10">
@@ -45,11 +53,19 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <a href="/shop" className="hover:text-primary transition-colors">
           Shop
         </a>
-        {searchParams.category && (
+        {searchParams.category && !searchParams.q && (
           <>
             <span>/</span>
             <span className="text-content font-medium">
               {searchParams.category}
+            </span>
+          </>
+        )}
+        {searchParams.q && (
+          <>
+            <span>/</span>
+            <span className="text-content font-medium">
+              Search
             </span>
           </>
         )}
