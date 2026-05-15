@@ -19,13 +19,13 @@ export interface Product {
   stock: number;
   status: "active" | "inactive";
 
-  colors?: string[] | null;
-  sizes?: string[] | null;
+  colors: string[] | null;
+  sizes: string[] | null;
 
   rating?: number;
   reviewCount?: number;
 
-  tags?: string[] | null;
+  tags: string[] | null;
   isNew?: boolean;
 
   createdAt: string;
