@@ -211,7 +211,6 @@ export default function AdminProducts({
                     <input
                       type="checkbox"
                       className="accent-primary cursor-pointer"
-                      label={`Select ${product.name}`}
                       aria-label={`Select ${product.name}`}
                     />
                   </td>
