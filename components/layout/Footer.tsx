@@ -64,13 +64,18 @@ export default function Footer() {
           </span>
           <p className="text-xs text-content-muted">© 2024 Luxe Retail. All Rights Reserved.</p>
           <div className="flex items-center gap-6 flex-wrap">
-            {["Privacy Policy", "Terms of Service", "Shipping Info", "Returns"].map((item) => (
+            {[
+              { label: "Privacy Policy", href: "/privacy" },
+              { label: "Terms of Service", href: "/terms" },
+              { label: "Shipping Info", href: "/shipping" },
+              { label: "Returns", href: "/returns" },
+            ].map((item) => (
               <Link
-                key={item}
-                href={`/${item.toLowerCase().replace(/ /g, "-")}`}
+                key={item.href}
+                href={item.href}
                 className="text-xs text-content-muted hover:text-primary transition-colors duration-200"
               >
-                {item}
+                {item.label}
               </Link>
             ))}
           </div>

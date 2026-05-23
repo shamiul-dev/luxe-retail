@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Luxe Retail
 
-## Getting Started
+Luxe Retail is a modern, high-performance e-commerce platform built to deliver a premium shopping experience. It features a stunning customer-facing storefront and a comprehensive administrative dashboard for store management.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Database**: PostgreSQL
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
+- **Authentication**: [Better Auth](https://better-auth.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Customer Storefront
+- **Dynamic Product Catalog**: Browse products with advanced filtering (category, price, brand) and real-time search functionality.
+- **Shopping Cart & Wishlist**: Persistent cart and wishlist management utilizing React Context and database synchronization.
+- **Secure Checkout**: Seamless checkout flow handling shipping addresses and simulated payment processing.
+- **User Accounts**: Customers can track order status, view their purchase history, and manage their profile and security settings securely.
+- **Customer Care Hub**: Dedicated pages for Shipping Information, Returns & Exchanges, Privacy, Terms of Service, and Cookies.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Admin Dashboard
+- **Analytics Overview**: High-level metrics for total sales, active orders, revenue, and recent customer activity.
+- **Order Management**: Comprehensive order tracking allowing administrators to view detailed order receipts, monitor shipping addresses, and dynamically update fulfillment statuses (Pending, Processing, Shipped, Delivered, Cancelled).
+- **Product & Category Management**: Tools to view, edit, and update the catalog and its associated metadata.
 
-## Learn More
+## 🛠️ Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL Database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd luxe-retail
+   ```
 
-## Deploy on Vercel
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Configure Environment Variables:
+   Create a `.env` file in the root directory and add your database and authentication secrets:
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/luxe_retail"
+   BETTER_AUTH_SECRET="your-super-secret-key"
+   NEXT_PUBLIC_APP_URL="http://localhost:3000"
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Run Database Migrations:
+   ```bash
+   npm run db:push
+   # OR
+   npx drizzle-kit push
+   ```
+
+5. Start the Development Server:
+   ```bash
+   npm run dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📂 Project Structure
+
+- `/app`: Next.js App Router configuration (handles both `/(store)` and `/(admin)` routing groups).
+- `/components`: Reusable UI components divided into layout, shop, admin, and generic UI elements.
+- `/context`: React Context providers for global state management (Cart, Wishlist).
+- `/db`: Database configuration, Drizzle schemas, and connection utilities.
+- `/lib`: Helper functions, constants, auth configuration, and database queries.
+- `/types`: TypeScript interfaces and type definitions.
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+
+PS: Still in Development
