@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Heart,
   ShoppingCart,
@@ -73,9 +73,78 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [wishlisted, setWishlisted] = useState(false);
   const [adding, setAdding] = useState(false);
   const [buyingNow, setBuyingNow] = useState(false);
+
+  // Reviews State
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsFetched, setReviewsFetched] = useState(false);
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [ratingInput, setRatingInput] = useState(5);
+  const [titleInput, setTitleInput] = useState("");
+  const [bodyInput, setBodyInput] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   const { addItem } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Optimistic UI for reviews summary
+  const [localRating, setLocalRating] = useState(Number(product.rating ?? 0));
+  const [localReviewCount, setLocalReviewCount] = useState(product.reviewCount);
+
+  useEffect(() => {
+    if (activeTab === "reviews" && !reviewsFetched) {
+      setReviewsLoading(true);
+      fetch(`/api/reviews?productId=${product.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setReviews(data);
+          }
+          setReviewsFetched(true);
+        })
+        .catch(console.error)
+        .finally(() => setReviewsLoading(false));
+    }
+  }, [activeTab, reviewsFetched, product.id]);
+
+  async function handleReviewSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!session) return router.push("/auth");
+
+    setSubmittingReview(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          rating: ratingInput,
+          title: titleInput,
+          body: bodyInput,
+        }),
+      });
+      
+      if (res.ok) {
+        const newReview = await res.json();
+        setReviews((prev) => [newReview, ...prev]);
+        setReviewFormOpen(false);
+        setRatingInput(5);
+        setTitleInput("");
+        setBodyInput("");
+        
+        // Optimistically update counts
+        const newTotal = (localRating * localReviewCount) + ratingInput;
+        const newCount = localReviewCount + 1;
+        setLocalRating(newTotal / newCount);
+        setLocalReviewCount(newCount);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmittingReview(false);
+    }
+  }
 
   const rating = Number(product.rating ?? 0);
   const inStock = product.stock > 0;
@@ -410,7 +479,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   : "text-content-muted hover:text-content-secondary",
               )}
             >
-              {tab === "reviews" ? `Reviews (${product.reviewCount})` : tab}
+              {tab === "reviews" ? `Reviews (${localReviewCount})` : tab}
             </button>
           ))}
         </div>
@@ -453,12 +522,117 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
         {activeTab === "reviews" && (
           <div className="max-w-2xl">
-            {product.reviewCount === 0 ? (
-              <p className="text-content-muted text-sm">
-                No reviews yet. Be the first to review this product.
-              </p>
+            {/* Reviews Header / Add Review Button */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="font-heading text-xl font-bold text-content">Customer Reviews</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex text-accent">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={14} className={i < Math.round(localRating) ? "fill-current" : "text-border"} />
+                    ))}
+                  </div>
+                  <span className="text-sm font-semibold text-content">{localRating.toFixed(1)} out of 5</span>
+                </div>
+              </div>
+              
+              {!reviewFormOpen && (
+                <Button variant="outline" size="sm" onClick={() => {
+                  if (!session) router.push("/auth");
+                  else setReviewFormOpen(true);
+                }}>
+                  Write a Review
+                </Button>
+              )}
+            </div>
+
+            {/* Review Form */}
+            {reviewFormOpen && (
+              <form onSubmit={handleReviewSubmit} className="bg-surface-low p-6 rounded-xl border border-border mb-8">
+                <h4 className="font-semibold text-content mb-4">Write a Review</h4>
+                
+                <div className="mb-4">
+                  <label className="block text-xs font-semibold text-content-muted uppercase tracking-wider mb-2">Rating</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRatingInput(star)}
+                        className={`p-1 hover:scale-110 transition-transform ${star <= ratingInput ? 'text-accent fill-accent' : 'text-border'}`}
+                      >
+                        <Star size={24} className={star <= ratingInput ? "fill-current" : ""} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-xs font-semibold text-content-muted uppercase tracking-wider mb-2">Review Title (Optional)</label>
+                  <input
+                    type="text"
+                    value={titleInput}
+                    onChange={(e) => setTitleInput(e.target.value)}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary text-sm"
+                    placeholder="Summary of your thoughts"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-xs font-semibold text-content-muted uppercase tracking-wider mb-2">Review (Optional)</label>
+                  <textarea
+                    value={bodyInput}
+                    onChange={(e) => setBodyInput(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-white focus:outline-none focus:border-primary text-sm resize-none"
+                    placeholder="What did you like or dislike?"
+                  />
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <Button variant="outline" type="button" onClick={() => setReviewFormOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button variant="primary" type="submit" disabled={submittingReview}>
+                    {submittingReview ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {/* Reviews List */}
+            {reviewsLoading ? (
+              <div className="py-12 flex justify-center">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="text-center py-12 bg-surface-low rounded-xl border border-border border-dashed">
+                <p className="text-content-muted text-sm">
+                  No reviews yet. Be the first to review this product.
+                </p>
+              </div>
             ) : (
-              <p className="text-content-muted text-sm">Reviews coming soon.</p>
+              <div className="space-y-6">
+                {reviews.map((review) => (
+                  <div key={review.id} className="border-b border-border pb-6 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex text-accent">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} size={12} className={i < review.rating ? "fill-current" : "text-border"} />
+                        ))}
+                      </div>
+                      <span className="text-xs font-medium text-content-secondary">
+                        {review.userName}
+                      </span>
+                      <span className="text-xs text-content-muted ml-auto">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {review.title && <h5 className="font-semibold text-content text-sm mb-1">{review.title}</h5>}
+                    {review.body && <p className="text-content-secondary text-sm leading-relaxed">{review.body}</p>}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}

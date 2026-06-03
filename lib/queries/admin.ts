@@ -180,5 +180,23 @@ export async function updateProduct(
 }
 
 export async function getAllCategories() {
-  return db.select().from(categories);
+  return db.select().from(categories).orderBy(desc(categories.createdAt));
+}
+
+export async function createCategory(data: { name: string; slug: string; description?: string; image?: string }) {
+  const [category] = await db.insert(categories).values(data).returning();
+  return category;
+}
+
+export async function updateCategory(categoryId: string, data: { name?: string; slug?: string; description?: string | null; image?: string | null }) {
+  const [updated] = await db
+    .update(categories)
+    .set(data)
+    .where(eq(categories.id, categoryId))
+    .returning();
+  return updated;
+}
+
+export async function deleteCategory(categoryId: string) {
+  await db.delete(categories).where(eq(categories.id, categoryId));
 }
